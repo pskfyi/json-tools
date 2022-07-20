@@ -40,7 +40,18 @@ export function typeOf(input: unknown): Json.TypeName | undefined {
 
 // Type guards
 export function isValue(input: unknown): input is Json.Value {
-  return typeOf(input) !== undefined;
+  const type = typeOf(input);
+
+  if (type === undefined) {
+    return false;
+  } else if (type === "array") {
+    return (input as Json.Array).every(isValue);
+  } else if (type === "object") {
+    return Object.getOwnPropertySymbols(input).length === 0 &&
+      Object.values(input as Record<string, unknown>).every(isValue);
+  } else {
+    return true;
+  }
 }
 
 export function isPrimitive(input: unknown): input is Json.Primitive {
@@ -50,11 +61,11 @@ export function isPrimitive(input: unknown): input is Json.Primitive {
 }
 
 export function isArray(input: unknown): input is Json.Array {
-  return Array.isArray(input);
+  return Array.isArray(input) && input.every(isValue);
 }
 
 export function isObject(input: unknown): input is Json.Object {
-  return typeof input === "object" && input !== null && !Array.isArray(input);
+  return typeOf(input) === "object" && isValue(input);
 }
 
 /**

@@ -57,6 +57,11 @@ Deno.test("Json.isArray()", () => {
   assert(!Json.isArray(Symbol.asyncIterator));
   assert(!Json.isArray(undefined));
   assert(!Json.isArray(100n));
+
+  assert(!Json.isArray([() => {}]));
+  assert(!Json.isArray([[undefined]]));
+  assert(!Json.isArray([[[100n]]]));
+  assert(!Json.isArray([[[[Symbol.asyncIterator]]]]));
 });
 
 Deno.test("Json.isObject()", () => {
@@ -72,6 +77,12 @@ Deno.test("Json.isObject()", () => {
   assert(!Json.isObject(Symbol.asyncIterator));
   assert(!Json.isObject(undefined));
   assert(!Json.isObject(100n));
+
+  assert(!Json.isObject({ "": () => {} }));
+  assert(!Json.isObject({ "": [undefined] }));
+  assert(!Json.isObject({ "": [[100n]] }));
+  assert(!Json.isObject({ "": [{ "": Symbol.asyncIterator }] }));
+  assert(!Json.isObject({ "": [{ [Symbol.asyncIterator]: "" }] }));
 });
 
 Deno.test("Json.isValue()", () => {
@@ -86,6 +97,12 @@ Deno.test("Json.isValue()", () => {
   assert(!Json.isValue(Symbol.asyncIterator));
   assert(!Json.isValue(undefined));
   assert(!Json.isValue(100n));
+
+  assert(!Json.isValue([() => {}]));
+  assert(!Json.isValue([[undefined]]));
+  assert(!Json.isValue([[[100n]]]));
+  assert(!Json.isValue({ "": [{ "": Symbol.asyncIterator }] }));
+  assert(!Json.isValue({ "": [{ [Symbol.asyncIterator]: "" }] }));
 });
 
 Deno.test("Json.equals()", () => {
