@@ -38,6 +38,7 @@ Deno.test("Json.isValue()", () => {
   assert(Json.isValue(null));
   assert(Json.isValue({}));
   assert(Json.isValue([]));
+
   assert(!Json.isValue(() => {}));
   assert(!Json.isValue(Symbol.asyncIterator));
   assert(!Json.isValue(undefined));
@@ -49,6 +50,7 @@ Deno.test("Json.isPrimitive()", () => {
   assert(Json.isPrimitive(123));
   assert(Json.isPrimitive(true));
   assert(Json.isPrimitive(null));
+
   assert(!Json.isPrimitive({}));
   assert(!Json.isPrimitive([]));
   assert(!Json.isPrimitive(() => {}));
@@ -58,12 +60,13 @@ Deno.test("Json.isPrimitive()", () => {
 });
 
 Deno.test("Json.isArray()", () => {
+  assert(Json.isArray([]));
+
   assert(!Json.isArray(""));
   assert(!Json.isArray(123));
   assert(!Json.isArray(true));
   assert(!Json.isArray(null));
   assert(!Json.isArray({}));
-  assert(Json.isArray([]));
   assert(!Json.isArray(() => {}));
   assert(!Json.isArray(Symbol.asyncIterator));
   assert(!Json.isArray(undefined));
@@ -71,11 +74,13 @@ Deno.test("Json.isArray()", () => {
 });
 
 Deno.test("Json.isObject()", () => {
+  assert(Json.isObject({}));
+  assert(Json.isObject({ "": [1, null, true] }));
+
   assert(!Json.isObject(""));
   assert(!Json.isObject(123));
   assert(!Json.isObject(true));
   assert(!Json.isObject(null));
-  assert(Json.isObject({}));
   assert(!Json.isObject([]));
   assert(!Json.isObject(() => {}));
   assert(!Json.isObject(Symbol.asyncIterator));
@@ -89,12 +94,6 @@ Deno.test("Json.equals()", () => {
   assert(Json.equals(true, true));
   assert(Json.equals(false, false));
   assert(Json.equals(null, null));
-
-  assert(!Json.equals("A", "B"));
-  assert(!Json.equals(0, 1));
-  assert(!Json.equals(true, false));
-  assert(!Json.equals(false, true));
-  assert(!Json.equals(null, false));
 
   assert(!Json.equals("A", "B"));
   assert(!Json.equals(0, 1));
