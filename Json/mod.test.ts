@@ -117,10 +117,24 @@ Deno.test("Json.equals()", () => {
   assert(Json.equals(true, true));
   assert(Json.equals(false, false));
   assert(Json.equals(null, null));
+  assert(Json.equals([], []));
+  assert(Json.equals({}, {}));
+  assert(Json.equals(
+    { "foo": [0, null, false], "bar": [1, true] },
+    { "foo": [0, null, false], "bar": [1, true] },
+  ));
 
   assert(!Json.equals("A", "B"));
   assert(!Json.equals(0, 1));
   assert(!Json.equals(true, false));
   assert(!Json.equals(false, true));
   assert(!Json.equals(null, false));
+  assert(!Json.equals([], {}));
+  assert(!Json.equals({}, []));
+  assert(
+    !Json.equals(
+      { "foo": [0, null, false], "bar": [1, true] },
+      { "bar": [0, null, false], "foo": [1, true] },
+    ),
+  );
 });
