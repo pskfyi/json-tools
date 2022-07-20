@@ -53,7 +53,10 @@ Deno.test("Json.isArray()", () => {
   assert(!Json.isArray(true));
   assert(!Json.isArray(null));
   assert(!Json.isArray({}));
+  assert(!Json.isArray(new Map()));
+  assert(!Json.isArray(new Set()));
   assert(!Json.isArray(() => {}));
+  assert(!Json.isArray(class Foo {}));
   assert(!Json.isArray(Symbol.asyncIterator));
   assert(!Json.isArray(undefined));
   assert(!Json.isArray(100n));
@@ -73,7 +76,10 @@ Deno.test("Json.isObject()", () => {
   assert(!Json.isObject(true));
   assert(!Json.isObject(null));
   assert(!Json.isObject([]));
+  assert(!Json.isObject(new Map()));
+  assert(!Json.isObject(new Set()));
   assert(!Json.isObject(() => {}));
+  assert(!Json.isObject(class Foo {}));
   assert(!Json.isObject(Symbol.asyncIterator));
   assert(!Json.isObject(undefined));
   assert(!Json.isObject(100n));

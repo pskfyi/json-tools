@@ -33,9 +33,17 @@ export function typeOf(input: unknown): Json.TypeName | undefined {
     return undefined;
   }
 
-  return type === "object"
-    ? input === null ? "null" : Array.isArray(input) ? "array" : type
-    : type;
+  if (type === "object") {
+    if (input === null) {
+      return "null";
+    } else if (Array.isArray(input)) {
+      return "array";
+    } else if (input instanceof Map || input instanceof Set) {
+      return undefined;
+    }
+  }
+
+  return type;
 }
 
 // Type guards
