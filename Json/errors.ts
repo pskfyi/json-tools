@@ -1,4 +1,4 @@
-import { Object } from "./types.ts";
+import type * as Json from "./types.ts";
 
 /**
  * Ergonomic error class for pretty printing JSON data
@@ -16,7 +16,7 @@ import { Object } from "./types.ts";
  * //     ]
  */
 export class PrettyError extends Error {
-  constructor(message: string, details: Object) {
+  constructor(message: string, details: Json.Object) {
     super(
       [
         message,
