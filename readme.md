@@ -4,9 +4,11 @@ A collection of JSON ecosystem utilities and homegrown additions.
 
 ## Usage
 
+<!-- deno-fmt-ignore -->
 ```ts
 import {
-  Json, // JSON type definitions and utilities.
+  Json,       // JSON type definitions and utilities.
+  JsonIndex,  // Homegrown utilities for JSON Arrays and Objects.
   // More coming soon
 } from "path/to/json-tools";
 ```
@@ -14,6 +16,7 @@ import {
 See:
 
 - [`Json`](./Json/readme.md)
+- [`JsonIndex`](./JsonIndex/readme.md)
 
 ## Development
 
@@ -27,7 +30,7 @@ deno fmt    # format files
 ## Roadmap
 
 - [x] Json
-- [ ] JsonIndex (homegrown module)
+- [x] JsonIndex (homegrown)
 - [ ] JsonPointer
 - [ ] JSONPatch [Uses JSON Pointer]
 - [ ] JSON Path
