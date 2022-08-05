@@ -18,8 +18,8 @@ export function clone<T extends Json.Value>(value: T): T {
 }
 
 /**
- * @returns a human readable type name, or undefined if the input is not JSON
- * serializable
+ * If the input is a string, number, boolean, null, object, or array, return
+ * a human-readable type name. Otherwise returns `undefined`.
  */
 export function typeOf(input: unknown): Json.TypeName | undefined {
   const type = typeof input;
