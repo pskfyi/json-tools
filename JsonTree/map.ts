@@ -1,13 +1,15 @@
 import type * as JsonTree from "./types.ts";
-import { crawl } from "./visitors.ts";
+import { crawlLeaves } from "./visitors.ts";
 
-/** Translates a tree into a map from Paths to Nodes. */
+/** Translates a tree into a map from Paths to leaf Nodes. */
 export function map(tree: JsonTree.Tree): Map<JsonTree.Path, JsonTree.Node> {
   const pathMap = new Map<JsonTree.Path, JsonTree.Node>();
 
-  crawl(tree, ({ path, node }) => {
+  crawlLeaves(tree, ({ path, node }) => {
     pathMap.set(path, node);
   });
 
   return pathMap;
 }
+
+// TODO: fromMap()

@@ -81,12 +81,12 @@ JsonTree.remove(tree, path);
 
 ### Tree Utilities
 
-These utilities decompose a tree into a simpler data structure.
+Decompose a tree into a collection of `Path` and leaf `Node` pairs.
 
 <!-- deno-fmt-ignore -->
 ```ts
-JsonTree.map(tree);     // Map<Path, Json.Value>
-JsonTree.entries(tree); // Array<[Path, Json.Value]>
+JsonTree.map(tree);     // Map<Path, Node>
+JsonTree.entries(tree); // Array<[Path, Node]>
 ```
 
 #### Iterables

@@ -7,21 +7,6 @@ import {
 
 import * as JsonTree from "./mod.ts";
 
-Deno.test("JsonTree.entries()", () => {
-  const tree: JsonTree.Tree = [{ "A": 6, "B": 4 }, 2];
-
-  assertEquals(
-    JsonTree.entries(tree),
-    [
-      [[], tree],
-      [[0], tree[0]],
-      [[0, "A"], 6],
-      [[0, "B"], 4],
-      [[1], 2],
-    ],
-  );
-});
-
 Deno.test("JsonTree.get()", () => {
   assertEquals(JsonTree.get({}, []), {});
   assertEquals(JsonTree.get([""], [0]), "");
@@ -167,16 +152,27 @@ Deno.test("JsonTree.insert()", () => {
   assertThrows(() => JsonTree.insert([[]], [0, ""], 7));
 });
 
+Deno.test("JsonTree.entries()", () => {
+  const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
+
+  assertEquals(
+    JsonTree.entries(tree),
+    [
+      [[0, "A"], 6],
+      [[0, "B"], []],
+      [[1], 2],
+    ],
+  );
+});
+
 Deno.test("JsonTree.map()", () => {
-  const tree: JsonTree.Tree = [{ "A": 6, "B": 4 }, 2];
+  const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
 
   assertEquals(
     JsonTree.map(tree),
-    new Map([
-      [[], tree],
-      [[0], tree[0]],
+    new Map<JsonTree.Path, JsonTree.Node>([
       [[0, "A"], 6],
-      [[0, "B"], 4],
+      [[0, "B"], []],
       [[1], 2],
     ]),
   );
@@ -251,6 +247,10 @@ Deno.test("JsonTree.childCrawler()", () => {
   // tested via JsonTree.crawlChildren()
 });
 
+Deno.test("JsonTree.leafCrawler()", () => {
+  // tested via JsonTree.crawlLeaves()
+});
+
 Deno.test("JsonTree.crawler()", () => {
   // tested via JsonTree.crawl()
 });
@@ -279,6 +279,27 @@ Deno.test("JsonTree.crawlChildren()", () => {
   );
 
   assert(JsonTree.crawlChildren(tree, () => 7) === 7);
+});
+
+Deno.test("JsonTree.crawlLeaves()", () => {
+  const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
+  const root = tree;
+  const infoEntries: Array<[JsonTree.Path, JsonTree.Location]> = [];
+
+  JsonTree.crawlLeaves(tree, (location) => {
+    infoEntries.push([location.path, location]);
+  });
+
+  assertEquals(
+    infoEntries,
+    [
+      [[0, "A"], { root, path: [0, "A"], node: 6 }],
+      [[0, "B"], { root, path: [0, "B"], node: [] }],
+      [[1], { root, path: [1], node: 2 }],
+    ],
+  );
+
+  assert(JsonTree.crawlLeaves(tree, () => 7) === 7);
 });
 
 Deno.test("JsonTree.crawl()", () => {
