@@ -27,10 +27,6 @@ JsonTree.Node;      // Json.Value
 JsonTree.Edge;      // string | number (should be an integer)
 JsonTree.Path;      // Edge[]
 
-JsonTree.Entry;     // [Path, Node]
-JsonTree.Entries;   // Entry[]
-JsonTree.PathMap;   // Map<Path, Node>
-
 JsonTree.Location;  // { root: Tree, path: Path, node: Node }
 ```
 
