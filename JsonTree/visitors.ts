@@ -2,7 +2,7 @@ import type * as JsonTree from "./types.ts";
 import { isTree } from "./guards.ts";
 import { _getChild } from "./_getChild.ts";
 import { PrimitiveError } from "./errors.ts";
-import { childCrawler, crawler, walker } from "./iterables.ts";
+import { childCrawler, crawler, leafCrawler, walker } from "./iterables.ts";
 
 /**
  * Crawls through a tree's children depth-first, invoking the callback
@@ -15,6 +15,24 @@ export function crawlChildren<T = undefined>(
   callback: (location: JsonTree.Location) => T,
 ): T {
   for (const location of childCrawler(tree)) {
+    const result = callback(location);
+    if (result !== undefined) return result;
+  }
+  // merely appeases the compiler
+  return undefined as unknown as T;
+}
+
+/**
+ * Crawls through a tree's leaves depth-first, invoking the callback
+ * function at each location encountered.
+ *
+ * @returns the result of the callback function if it ever returns a non-undefined value.
+ */
+export function crawlLeaves<T = undefined>(
+  tree: JsonTree.Tree,
+  callback: (location: JsonTree.Location) => T,
+): T {
+  for (const location of leafCrawler(tree)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }

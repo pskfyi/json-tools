@@ -119,7 +119,11 @@ for (const location of JsonTree.crawler(tree)) { /*
 
 ##### `JsonTree.childCrawler(tree)`
 
-Same as above, except the first loop is omitted.
+Same as `JsonTree.crawler` above, except the first loop is omitted.
+
+##### `JsonTree.leafCrawler(tree)`
+
+Same as `JsonTree.crawler` above, except only leaf nodes yield values.
 
 ##### `JsonTree.walker(tree, path)`
 
@@ -148,6 +152,7 @@ value.
 ```ts
 JsonTree.crawlChildren(tree, callback);
 JsonTree.crawl(tree, callback);
+JsonTree.crawlLeaves(tree, callback);
 JsonTree.walk(tree, path, callback);
 JsonTree.at(tree, path, callback); // call at the end of the path
 ```

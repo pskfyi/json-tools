@@ -9,11 +9,11 @@ export function childCrawler(
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
-      const keys = Array.isArray(tree)
+      const edges = Array.isArray(tree)
         ? tree.map((_v, i) => i)
         : Object.keys(tree);
 
-      for (const edge of keys) {
+      for (const edge of edges) {
         const node = _getChild(tree, edge);
 
         yield { root: tree, node, path: [edge] };
@@ -26,6 +26,40 @@ export function childCrawler(
               path: [edge, ...location.path],
             };
           }
+        }
+      }
+    },
+  };
+}
+
+/** Construct an iterator that crawls through a tree's leaves depth-first. */
+export function leafCrawler(
+  tree: JsonTree.Tree,
+): Iterable<JsonTree.Location> {
+  return {
+    *[Symbol.iterator]() {
+      const edges = Array.isArray(tree)
+        ? tree.map((_v, i) => i)
+        : Object.keys(tree);
+
+      if (!edges.length) {
+        yield { root: tree, node: tree, path: [] };
+      }
+
+      for (const edge of edges) {
+        const node = _getChild(tree, edge);
+        const nodeIsTree = isTree(node);
+
+        if (nodeIsTree) {
+          for (const location of leafCrawler(node)) {
+            yield {
+              root: tree,
+              node: location.node,
+              path: [edge, ...location.path],
+            };
+          }
+        } else {
+          yield { root: tree, node, path: [edge] };
         }
       }
     },
