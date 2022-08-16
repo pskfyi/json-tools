@@ -1,5 +1,5 @@
 import type * as JsonTree from "./types.ts";
-import { at } from "./visitors.ts";
+import { walk } from "./visitors.ts";
 import { parentPath } from "./parentPath.ts";
 import { assertTree } from "./guards.ts";
 import { EdgeTypeError } from "./errors.ts";
@@ -71,10 +71,26 @@ export function insert<T extends JsonTree.Tree>(
     );
   }
 
-  at(tree, _parentPath, ({ node: target }) => {
-    assertTree(target);
-    const edge = path[path.length - 1];
-    _insertChild(target, edge, node);
+  walk(tree, _parentPath, (location) => {
+    const isEndOfPath = location.path.length === _parentPath.length;
+    const edge = path[location.path.length];
+    assertTree(location.node);
+
+    if (isEndOfPath) {
+      return _insertChild(location.node, edge, node);
+    }
+
+    const hasGrandchild = (path.length - location.path.length) >= 2;
+
+    if (hasGrandchild && !(edge in location.node)) {
+      const grandchildEdge = path[location.path.length + 1];
+
+      _insertChild(
+        location.node,
+        edge,
+        typeof grandchildEdge === "number" ? [] : {},
+      );
+    }
   });
 
   return tree;

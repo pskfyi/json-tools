@@ -1,8 +1,9 @@
 import type * as JsonTree from "./types.ts";
-import { at } from "./visitors.ts";
+import { walk } from "./visitors.ts";
 import { parentPath } from "./parentPath.ts";
 import { assertTree } from "./guards.ts";
 import { EdgeTypeError } from "./errors.ts";
+import { _getChild } from "./_getChild.ts";
 
 function _setChild(
   tree: JsonTree.Tree,
@@ -54,12 +55,26 @@ export function set<T extends JsonTree.Tree>(
     throw new Error("JsonTree.set() cannot replace the entire tree.");
   }
 
-  at(tree, _parentPath, (location) => {
-    const tree = location.node;
-    assertTree(tree);
+  walk(tree, _parentPath, (location) => {
+    const isEndOfPath = location.path.length === _parentPath.length;
+    const edge = path[location.path.length];
+    assertTree(location.node);
 
-    const edge = path[path.length - 1];
-    _setChild(tree, edge, node);
+    if (isEndOfPath) {
+      return _setChild(location.node, edge, node);
+    }
+
+    const hasGrandchild = (path.length - location.path.length) >= 2;
+
+    if (hasGrandchild && !(edge in location.node)) {
+      const grandchildEdge = path[location.path.length + 1];
+
+      _setChild(
+        location.node,
+        edge,
+        typeof grandchildEdge === "number" ? [] : {},
+      );
+    }
   });
 
   return tree;

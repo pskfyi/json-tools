@@ -150,6 +150,11 @@ Deno.test("JsonTree.insert()", () => {
   assertThrows(() => JsonTree.insert({}, [0], 7));
   assertThrows(() => JsonTree.insert([], [""], 7));
   assertThrows(() => JsonTree.insert([[]], [0, ""], 7));
+
+  // Creates Intermediate Nodes
+  assertEquals(JsonTree.insert([], [0, 0], 7), [[7]]);
+  assertEquals(JsonTree.insert([], [0, 0, 0], 7), [[[7]]]);
+  assertEquals(JsonTree.insert([], [0, "", 0], 7), [{ "": [7] } as any]);
 });
 
 Deno.test("JsonTree.entries()", () => {
@@ -220,7 +225,7 @@ Deno.test("JsonTree.set()", () => {
   assertEquals(JsonTree.set({ "": [] }, ["", 0], 7), { "": [7] });
   assertEquals(JsonTree.set({ "": [] }, ["", 1], 7), { "": [null, 7] });
 
-  // Overwrite
+  // // Overwrite
   assertEquals(JsonTree.set([6], [0], 7), [7]);
   assertEquals(JsonTree.set({ "": [] }, [""], 7), { "": 7 } as any);
   assertEquals(JsonTree.set({ "": [6] }, ["", 0], 7), { "": [7] } as any);
@@ -229,6 +234,11 @@ Deno.test("JsonTree.set()", () => {
   assertThrows(() => JsonTree.set({}, [0], 7));
   assertThrows(() => JsonTree.set([], [""], 7));
   assertThrows(() => JsonTree.set([[]], [0, ""], 7));
+
+  // Creates Intermediate Nodes
+  assertEquals(JsonTree.set([], [0, 0], 7), [[7]]);
+  assertEquals(JsonTree.set([], [0, 0, 0], 7), [[[7]]]);
+  assertEquals(JsonTree.set([], [0, "", 0], 7), [{ "": [7] } as any]);
 });
 
 Deno.test("JsonTree.test()", () => {
