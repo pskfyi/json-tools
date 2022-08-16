@@ -1,3 +1,4 @@
+import { set } from "./set.ts";
 import type * as JsonTree from "./types.ts";
 import { crawlLeaves } from "./visitors.ts";
 
@@ -14,4 +15,21 @@ export function entries(
   return entries;
 }
 
-// TODO: fromEntries()
+export function fromEntries(
+  entries: Array<[JsonTree.Path, JsonTree.Node]>,
+): JsonTree.Tree {
+  if (!entries.length) {
+    throw new Error("JsonTree.fromEntries() requires at least one entry");
+  }
+
+  const firstEntry = entries[0];
+  const firstEntryPath = firstEntry[0];
+  const firstEntryPathEdge = firstEntryPath[0];
+  const treeIsArray = typeof firstEntryPathEdge === "number";
+
+  const tree: JsonTree.Tree = treeIsArray ? [] : {};
+
+  entries.forEach(([path, node]) => set(tree, path, node));
+
+  return tree;
+}

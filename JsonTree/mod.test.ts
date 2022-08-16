@@ -170,6 +170,20 @@ Deno.test("JsonTree.entries()", () => {
   );
 });
 
+Deno.test("JsonTree.fromEntries()", () => {
+  const entries: Array<[JsonTree.Path, JsonTree.Node]> = [
+    [[0, "A"], 6],
+    [[0, "B"], []],
+    [[1], 2],
+    [[2], {}],
+  ];
+
+  assertEquals(
+    JsonTree.fromEntries(entries),
+    [{ "A": 6, "B": [] }, 2, {}],
+  );
+});
+
 Deno.test("JsonTree.map()", () => {
   const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
 
@@ -180,6 +194,20 @@ Deno.test("JsonTree.map()", () => {
       [[0, "B"], []],
       [[1], 2],
     ]),
+  );
+});
+
+Deno.test("JsonTree.fromMap()", () => {
+  const map = new Map<JsonTree.Path, JsonTree.Node>([
+    [[0, "A"], 6],
+    [[0, "B"], []],
+    [[1], 2],
+    [[2], {}],
+  ]);
+
+  assertEquals(
+    JsonTree.fromMap(map),
+    [{ "A": 6, "B": [] }, 2, {}],
   );
 });
 
