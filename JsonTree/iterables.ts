@@ -5,23 +5,23 @@ import { _getChild } from "./_getChild.ts";
 
 /** Construct an iterator that crawls through a tree's children depth-first. */
 export function childCrawler(
-  tree: JsonTree.Tree,
+  root: JsonTree.Tree,
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
-      const edges = Array.isArray(tree)
-        ? tree.map((_v, i) => i)
-        : Object.keys(tree);
+      const edges = Array.isArray(root)
+        ? root.map((_v, i) => i)
+        : Object.keys(root);
 
       for (const edge of edges) {
-        const node = _getChild(tree, edge);
+        const node = _getChild(root, edge);
 
-        yield { root: tree, node, path: [edge] };
+        yield { root, node, path: [edge] };
 
         if (isTree(node)) {
           for (const location of childCrawler(node)) {
             yield {
-              root: tree,
+              root,
               node: location.node,
               path: [edge, ...location.path],
             };
@@ -34,32 +34,32 @@ export function childCrawler(
 
 /** Construct an iterator that crawls through a tree's leaves depth-first. */
 export function leafCrawler(
-  tree: JsonTree.Tree,
+  root: JsonTree.Tree,
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
-      const edges = Array.isArray(tree)
-        ? tree.map((_v, i) => i)
-        : Object.keys(tree);
+      const edges = Array.isArray(root)
+        ? root.map((_v, i) => i)
+        : Object.keys(root);
 
       if (!edges.length) {
-        yield { root: tree, node: tree, path: [] };
+        yield { root, node: root, path: [] };
       }
 
       for (const edge of edges) {
-        const node = _getChild(tree, edge);
+        const node = _getChild(root, edge);
         const nodeIsTree = isTree(node);
 
         if (nodeIsTree) {
           for (const location of leafCrawler(node)) {
             yield {
-              root: tree,
+              root,
               node: location.node,
               path: [edge, ...location.path],
             };
           }
         } else {
-          yield { root: tree, node, path: [edge] };
+          yield { root, node, path: [edge] };
         }
       }
     },
@@ -68,13 +68,13 @@ export function leafCrawler(
 
 /** Construct an iterator that crawls through a tree depth-first. */
 export function crawler(
-  tree: JsonTree.Tree,
+  root: JsonTree.Tree,
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
-      yield { root: tree, node: tree, path: [] };
+      yield { root, node: root, path: [] };
 
-      for (const location of childCrawler(tree)) {
+      for (const location of childCrawler(root)) {
         yield location;
       }
     },
@@ -83,32 +83,27 @@ export function crawler(
 
 /** Construct an iterator that walks a path through a tree. */
 export function walker(
-  tree: JsonTree.Tree,
+  root: JsonTree.Tree,
   pathToWalk: JsonTree.Path,
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
-      let path: JsonTree.Path = [];
-      let intermediateTree: JsonTree.Tree = tree;
-      let node: JsonTree.Node = tree;
+      yield { root, node: root, path: [] };
 
-      yield { root: tree, node, path };
+      let intermediateTree: JsonTree.Tree = root;
+      let path: JsonTree.Path = [];
+      let node: JsonTree.Node;
 
       for (const edge of pathToWalk) {
         node = _getChild(intermediateTree, edge);
-
         path = [...path, edge];
 
-        yield { root: tree, node, path };
+        yield { root, node, path };
 
         const isLast = pathToWalk.length === path.length;
-
         if (isLast) break;
 
-        if (!isTree(node)) {
-          throw new PrimitiveError(node, edge);
-        }
-
+        if (!isTree(node)) throw new PrimitiveError(node, edge);
         intermediateTree = node;
       }
     },
