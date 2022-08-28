@@ -50,7 +50,6 @@ const ENTRIES: Array<[JsonTree.Path, JsonTree.Node]> = [
   [[1], 2],
   [[2], {}],
 ];
-const MAP = new Map(ENTRIES);
 
 Deno.test("JsonTree", async ({ step: t }) => {
   await t("type guards > isTree()", () => {
@@ -115,8 +114,6 @@ Deno.test("JsonTree", async ({ step: t }) => {
   await t("tree > fromEntries()", () => {
     equals(JsonTree.fromEntries(ENTRIES), TREE);
   });
-  await t("tree > map()", () => assertEquals(JsonTree.map(TREE), MAP));
-  await t("tree > fromMap()", () => assertEquals(JsonTree.fromMap(MAP), TREE));
 
   await t("CRUD > get()", () => {
     VALID_TESTS.forEach(([t, p, n]) => assertEquals(JsonTree.get(t, p), n));

@@ -86,10 +86,7 @@ recompose a `Tree` from such a description.
 
 <!-- deno-fmt-ignore -->
 ```ts
-JsonTree.map(tree);     // Map<Path, Node>
 JsonTree.entries(tree); // Array<[Path, Node]>
-
-JsonTree.fromMap(map);
 JsonTree.fromEntries(entries);
 ```
 
