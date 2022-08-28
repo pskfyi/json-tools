@@ -1,4 +1,5 @@
 import { PrettyError } from "../Json/errors.ts";
+import { typeOf } from "../Json/utilities.ts";
 import type * as Json from "../Json/types.ts";
 import type * as JsonTree from "./types.ts";
 
@@ -31,6 +32,22 @@ export class PrimitiveError extends PrettyError {
     super(
       `Cannot read a property of a primitive value.`,
       { edge, value },
+    );
+  }
+}
+
+export class TypeAssertionError extends PrettyError {
+  constructor(
+    input: unknown,
+    expectedType: string,
+  ) {
+    super(
+      `Type assertion failed. Expected Json.typeOf() to be ${expectedType}, but received ${
+        typeOf(input)
+      }.`,
+      {
+        value: String(input),
+      },
     );
   }
 }

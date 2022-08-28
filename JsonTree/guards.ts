@@ -1,4 +1,5 @@
 import { isValue } from "../Json/utilities.ts";
+import { TypeAssertionError } from "./errors.ts";
 import type * as JsonTree from "./types.ts";
 
 export function isTree(input: unknown): input is JsonTree.Tree {
@@ -42,17 +43,26 @@ export function edgeMatchesTree(
 export function assertTree(
   input: unknown,
 ): asserts input is JsonTree.Tree {
-  if (!isTree(input)) throw new Error();
+  if (!isTree(input)) {
+    throw new TypeAssertionError(input, "a Json.Object or Json.Array");
+  }
 }
 
 export function assertEdge(
   input: unknown,
 ): asserts input is JsonTree.Edge {
-  if (!isEdge(input)) throw new Error();
+  if (!isEdge(input)) {
+    throw new TypeAssertionError(input, "a string or non-negative integer");
+  }
 }
 
 export function assertPath(
   input: unknown,
 ): asserts input is JsonTree.Path {
-  if (!isPath(input)) throw new Error();
+  if (!isPath(input)) {
+    throw new TypeAssertionError(
+      input,
+      "an array of strings and/or non-negative integers",
+    );
+  }
 }
