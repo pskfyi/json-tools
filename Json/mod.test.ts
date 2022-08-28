@@ -2,6 +2,38 @@ import { assert } from "https://deno.land/std@0.148.0/testing/asserts.ts";
 
 import * as Json from "./mod.ts";
 
+const ARRAYS: Json.Array[] = [[], [[]], [[[], []], []]];
+const OBJECTS: Json.Object[] = [{}, { A: 1 }];
+const COLLECTIONS = [ARRAYS, OBJECTS].flat();
+
+const STRINGS = ["", '"Hello"', `'"`];
+const NUMBERS = [123, 0, 1e4];
+const BOOLEANS = [true, false];
+const PRIMITIVES = [BOOLEANS, null, NUMBERS, STRINGS].flat();
+
+const VALUES = [PRIMITIVES, COLLECTIONS].flat();
+
+const NON_VALUES = [
+  new Map(),
+  new Set(),
+  () => {},
+  class Foo {},
+  Symbol.asyncIterator,
+  undefined,
+  100n,
+  [[100n]],
+  { [Symbol.asyncIterator]: "" },
+];
+
+const TYPE_MAP: Record<Json.TypeName, Json.Value[]> = {
+  array: ARRAYS,
+  boolean: BOOLEANS,
+  null: [null],
+  number: NUMBERS,
+  object: OBJECTS,
+  string: STRINGS,
+};
+
 Deno.test("Json", async ({ step: t }) => {
   // Intentionally not tested
   await t(".parse()", () => {});
@@ -10,90 +42,44 @@ Deno.test("Json", async ({ step: t }) => {
   await t(".clone()", () => {});
 
   await t(".typeOf()", () => {
-    assert(Json.typeOf("") === "string");
-    assert(Json.typeOf(123) === "number");
-    assert(Json.typeOf(true) === "boolean");
-    assert(Json.typeOf(null) === "null");
-    assert(Json.typeOf({}) === "object");
-    assert(Json.typeOf([]) === "array");
-    assert(Json.typeOf(() => {}) === undefined);
-    assert(Json.typeOf(Symbol.asyncIterator) === undefined);
-    assert(Json.typeOf(undefined) === undefined);
-    assert(Json.typeOf(100n) === undefined);
+    Object.entries(TYPE_MAP).forEach(([typeName, values]) =>
+      values.forEach((val) => assert(Json.typeOf(val) === typeName))
+    );
+
+    NON_VALUES.slice(0, NON_VALUES.length - 2).forEach((val) =>
+      assert(Json.typeOf(val) === undefined)
+    );
   });
 
   await t(".isPrimitive()", () => {
-    assert(Json.isPrimitive(""));
-    assert(Json.isPrimitive(123));
-    assert(Json.isPrimitive(true));
-    assert(Json.isPrimitive(null));
+    PRIMITIVES.forEach((val) => assert(Json.isPrimitive(val)));
+    COLLECTIONS.forEach((val) => assert(!Json.isPrimitive(val)));
 
-    assert(!Json.isPrimitive({}));
-    assert(!Json.isPrimitive([]));
-    assert(!Json.isPrimitive(() => {}));
-    assert(!Json.isPrimitive(Symbol.asyncIterator));
-    assert(!Json.isPrimitive(undefined));
-    assert(!Json.isPrimitive(100n));
+    NON_VALUES.forEach((val) => assert(!Json.isPrimitive(val)));
   });
 
   await t(".isArray()", () => {
-    assert(Json.isArray([]));
+    ARRAYS.forEach((val) => assert(Json.isArray(val)));
 
-    assert(!Json.isArray(""));
-    assert(!Json.isArray(123));
-    assert(!Json.isArray(true));
-    assert(!Json.isArray(null));
-    assert(!Json.isArray({}));
-    assert(!Json.isArray(new Map()));
-    assert(!Json.isArray(new Set()));
-    assert(!Json.isArray(() => {}));
-    assert(!Json.isArray(class Foo {}));
-    assert(!Json.isArray(Symbol.asyncIterator));
-    assert(!Json.isArray(undefined));
-    assert(!Json.isArray(100n));
-
-    assert(!Json.isArray([() => {}]));
-    assert(!Json.isArray([[undefined]]));
-    assert(!Json.isArray([[[100n]]]));
-    assert(!Json.isArray([[[[Symbol.asyncIterator]]]]));
+    PRIMITIVES.forEach((val) => assert(!Json.isArray(val)));
+    OBJECTS.forEach((val) => assert(!Json.isArray(val)));
+    NON_VALUES.forEach((val) => assert(!Json.isArray(val)));
+    NON_VALUES.forEach((val) => assert(!Json.isArray([val])));
   });
 
   await t(".isObject()", () => {
-    assert(Json.isObject({}));
-    assert(Json.isObject({ "": [1, null, true] }));
+    OBJECTS.forEach((val) => assert(Json.isObject(val)));
 
-    assert(!Json.isObject(""));
-    assert(!Json.isObject(123));
-    assert(!Json.isObject(true));
-    assert(!Json.isObject(null));
-    assert(!Json.isObject([]));
-    assert(!Json.isObject(new Map()));
-    assert(!Json.isObject(new Set()));
-    assert(!Json.isObject(() => {}));
-    assert(!Json.isObject(class Foo {}));
-    assert(!Json.isObject(Symbol.asyncIterator));
-    assert(!Json.isObject(undefined));
-    assert(!Json.isObject(100n));
-
-    assert(!Json.isObject({ "": () => {} }));
-    assert(!Json.isObject({ "": [undefined] }));
-    assert(!Json.isObject({ "": [[100n]] }));
-    assert(!Json.isObject({ "": [{ "": Symbol.asyncIterator }] }));
-    assert(!Json.isObject({ "": [{ [Symbol.asyncIterator]: "" }] }));
+    PRIMITIVES.forEach((val) => assert(!Json.isObject(val)));
+    ARRAYS.forEach((val) => assert(!Json.isObject(val)));
+    NON_VALUES.forEach((val) => assert(!Json.isObject(val)));
+    NON_VALUES.forEach((val) => assert(!Json.isObject({ "": val })));
   });
 
   await t(".isValue()", () => {
-    assert(Json.isValue(""));
-    assert(Json.isValue(123));
-    assert(Json.isValue(true));
-    assert(Json.isValue(null));
-    assert(Json.isValue({}));
-    assert(Json.isValue([]));
+    VALUES.forEach((val) => assert(Json.isValue(val)));
 
-    assert(!Json.isValue(() => {}));
-    assert(!Json.isValue(Symbol.asyncIterator));
-    assert(!Json.isValue(undefined));
-    assert(!Json.isValue(100n));
+    NON_VALUES.forEach((val) => assert(!Json.isValue(val)));
 
     assert(!Json.isValue([() => {}]));
     assert(!Json.isValue([[undefined]]));
@@ -103,13 +89,7 @@ Deno.test("Json", async ({ step: t }) => {
   });
 
   await t(".equals()", () => {
-    assert(Json.equals("A", "A"));
-    assert(Json.equals(1, 1));
-    assert(Json.equals(true, true));
-    assert(Json.equals(false, false));
-    assert(Json.equals(null, null));
-    assert(Json.equals([], []));
-    assert(Json.equals({}, {}));
+    VALUES.forEach((val) => assert(Json.equals(val, val)));
     assert(Json.equals(
       { "foo": [0, null, false], "bar": [1, true] },
       { "foo": [0, null, false], "bar": [1, true] },
