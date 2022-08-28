@@ -1,5 +1,5 @@
 import { PrettyError } from "../Json/errors.ts";
-import { typeOf } from "../Json/utilities.ts";
+import { shallowTypeOf } from "../Json/utilities.ts";
 import type * as Json from "../Json/types.ts";
 import type * as JsonTree from "./types.ts";
 
@@ -42,8 +42,8 @@ export class TypeAssertionError extends PrettyError {
     expectedType: string,
   ) {
     super(
-      `Type assertion failed. Expected Json.typeOf() to be ${expectedType}, but received ${
-        typeOf(input)
+      `Type assertion failed. Expected Json.shallowTypeOf() to be ${expectedType}, but received ${
+        shallowTypeOf(input)
       }.`,
       {
         value: String(input),

@@ -21,7 +21,7 @@ export function clone<T extends Json.Value>(value: T): T {
  * If the input is a string, number, boolean, null, object, or array, return
  * a human-readable type name. Otherwise returns `undefined`.
  */
-export function typeOf(input: unknown): Json.TypeName | undefined {
+export function shallowTypeOf(input: unknown): Json.TypeName | undefined {
   const type = typeof input;
 
   if (
@@ -46,20 +46,33 @@ export function typeOf(input: unknown): Json.TypeName | undefined {
   return type;
 }
 
-// Type guards
-export function isValue(input: unknown): input is Json.Value {
-  const type = typeOf(input);
+/**
+ * Deep type check. If the input is a string, number, boolean, null, object
+ * with JSON-serializable properties, or array with JSON-serializable valid,
+ * return a human-readable type name. Otherwise returns `undefined`.
+ */
+export function typeOf(input: unknown): Json.TypeName | undefined {
+  const type = shallowTypeOf(input);
 
-  if (type === undefined) {
-    return false;
-  } else if (type === "array") {
-    return (input as Json.Array).every(isValue);
+  if (type === "array") {
+    return (input as Json.Array).every((child) => typeOf(child) !== undefined)
+      ? "array"
+      : undefined;
   } else if (type === "object") {
     return Object.getOwnPropertySymbols(input).length === 0 &&
-      Object.values(input as Record<string, unknown>).every(isValue);
+        Object.values(input as Record<string, unknown>).every((child) =>
+          typeOf(child) !== undefined
+        )
+      ? "object"
+      : undefined;
   } else {
-    return true;
+    return type;
   }
+}
+
+// Type guards
+export function isValue(input: unknown): input is Json.Value {
+  return typeOf(input) !== undefined;
 }
 
 export function isPrimitive(input: unknown): input is Json.Primitive {
@@ -69,11 +82,19 @@ export function isPrimitive(input: unknown): input is Json.Primitive {
 }
 
 export function isArray(input: unknown): input is Json.Array {
-  return Array.isArray(input) && input.every(isValue);
+  return typeOf(input) === "array";
+}
+
+/**
+ * Checks the input's type without checking if its children are
+ * JSON-serializable.
+ */
+export function isObjectShallow(input: unknown): input is Json.Object {
+  return shallowTypeOf(input) === "object";
 }
 
 export function isObject(input: unknown): input is Json.Object {
-  return typeOf(input) === "object" && isValue(input);
+  return typeOf(input) === "object";
 }
 
 /**
@@ -81,12 +102,10 @@ export function isObject(input: unknown): input is Json.Object {
  * operation: https://datatracker.ietf.org/doc/html/rfc6902#section-4.6
  */
 export function equals(first: Json.Value, second: Json.Value): boolean {
-  const firstType = typeOf(first);
-  const secondType = typeOf(second);
+  const firstType = shallowTypeOf(first);
+  const secondType = shallowTypeOf(second);
 
-  if (firstType !== secondType) {
-    return false;
-  }
+  if (firstType !== secondType) return false;
 
   if (firstType === "array") {
     const _first = first as Json.Array;

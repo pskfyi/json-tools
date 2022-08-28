@@ -13,7 +13,7 @@ const PRIMITIVES = [BOOLEANS, null, NUMBERS, STRINGS].flat();
 
 const VALUES = [PRIMITIVES, COLLECTIONS].flat();
 
-const NON_VALUES = [
+const SHALLOW_NON_VALUES = [
   new Map(),
   new Set(),
   () => {},
@@ -21,9 +21,12 @@ const NON_VALUES = [
   Symbol.asyncIterator,
   undefined,
   100n,
+];
+const DEEP_NON_VALUES = [
   [[100n]],
   { [Symbol.asyncIterator]: "" },
 ];
+const NON_VALUES = [SHALLOW_NON_VALUES, DEEP_NON_VALUES].flat();
 
 const TYPE_MAP: Record<Json.TypeName, Json.Value[]> = {
   array: ARRAYS,
@@ -41,14 +44,20 @@ Deno.test("Json", async ({ step: t }) => {
   await t(".minify()", () => {});
   await t(".clone()", () => {});
 
+  await t(".shallowTypeOf()", () => {
+    Object.entries(TYPE_MAP).forEach(([typeName, values]) =>
+      values.forEach((val) => assert(Json.typeOf(val) === typeName))
+    );
+
+    SHALLOW_NON_VALUES.forEach((val) => assert(Json.typeOf(val) === undefined));
+  });
+
   await t(".typeOf()", () => {
     Object.entries(TYPE_MAP).forEach(([typeName, values]) =>
       values.forEach((val) => assert(Json.typeOf(val) === typeName))
     );
 
-    NON_VALUES.slice(0, NON_VALUES.length - 2).forEach((val) =>
-      assert(Json.typeOf(val) === undefined)
-    );
+    NON_VALUES.forEach((val) => assert(Json.typeOf(val) === undefined));
   });
 
   await t(".isPrimitive()", () => {
@@ -65,6 +74,15 @@ Deno.test("Json", async ({ step: t }) => {
     OBJECTS.forEach((val) => assert(!Json.isArray(val)));
     NON_VALUES.forEach((val) => assert(!Json.isArray(val)));
     NON_VALUES.forEach((val) => assert(!Json.isArray([val])));
+  });
+
+  await t(".isObjectShallow()", () => {
+    OBJECTS.forEach((val) => assert(Json.isObjectShallow(val)));
+    NON_VALUES.forEach((val) => assert(Json.isObjectShallow({ "": val })));
+
+    PRIMITIVES.forEach((val) => assert(!Json.isObjectShallow(val)));
+    ARRAYS.forEach((val) => assert(!Json.isObjectShallow(val)));
+    SHALLOW_NON_VALUES.forEach((val) => assert(!Json.isObjectShallow(val)));
   });
 
   await t(".isObject()", () => {
