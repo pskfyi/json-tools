@@ -18,6 +18,12 @@ for applying them:
 These concepts are applied to provide functionality similar to JSON
 Pointer-based operations.
 
+```ts
+import { JsonTree } from "path/to/JsonTools/mod.ts";
+// OR
+import * as JsonTree from "path/to/JsonTree/mod.ts";
+```
+
 ## Types
 
 <!-- deno-fmt-ignore -->
