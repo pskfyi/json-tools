@@ -20,7 +20,8 @@ export function isEdge(input: unknown): input is JsonTree.Edge {
   const type = typeof input;
 
   return type === "string" ||
-    (type === "number" && Number.isSafeInteger(input));
+    (type === "number" && Number.isSafeInteger(input) &&
+      (input as number) >= 0);
 }
 
 export function isPath(input: unknown): input is JsonTree.Path {

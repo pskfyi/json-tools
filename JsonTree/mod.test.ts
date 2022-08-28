@@ -44,6 +44,7 @@ Deno.test("JsonTree.isEdge()", () => {
   assert(JsonTree.isEdge(0));
   assert(JsonTree.isEdge(7));
 
+  assert(!JsonTree.isEdge(-5));
   assert(!JsonTree.isEdge(3.14));
   assert(!JsonTree.isEdge(Infinity));
   assert(!JsonTree.isEdge(-Infinity));
@@ -96,6 +97,7 @@ Deno.test("JsonTree.assertEdge()", () => {
   JsonTree.assertEdge(0);
   JsonTree.assertEdge(7);
 
+  assertThrows(() => JsonTree.assertEdge(-5));
   assertThrows(() => JsonTree.assertEdge(3.14));
   assertThrows(() => JsonTree.assertEdge(Infinity));
   assertThrows(() => JsonTree.assertEdge(-Infinity));
@@ -111,6 +113,7 @@ Deno.test("JsonTree.assertPath()", () => {
   assertThrows(() => JsonTree.assertPath(0));
   assertThrows(() => JsonTree.assertPath(7));
 
+  assertThrows(() => JsonTree.assertPath([-5]));
   assertThrows(() => JsonTree.assertPath([3.14]));
   assertThrows(() => JsonTree.assertPath([Infinity]));
   assertThrows(() => JsonTree.assertPath([-Infinity]));
