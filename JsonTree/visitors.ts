@@ -16,16 +16,14 @@ import {
  *
  * @returns the result of the callback function if it ever returns a non-undefined value.
  */
-export function crawlChildren<T = undefined>(
+export function crawlChildren<T>(
   tree: JsonTree.Tree,
   callback: (location: JsonTree.Location) => T,
-): T {
+): T | void {
   for (const location of childCrawler(tree)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
-  // merely appeases the compiler
-  return undefined as unknown as T;
 }
 
 /**
@@ -34,16 +32,14 @@ export function crawlChildren<T = undefined>(
  *
  * @returns the result of the callback function if it ever returns a non-undefined value.
  */
-export function crawlLeaves<T = undefined>(
+export function crawlLeaves<T>(
   tree: JsonTree.Tree,
   callback: (location: JsonTree.Location) => T,
-): T {
+): T | void {
   for (const location of leafCrawler(tree)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
-  // merely appeases the compiler
-  return undefined as unknown as T;
 }
 
 /**
@@ -52,16 +48,14 @@ export function crawlLeaves<T = undefined>(
  *
  * @returns the result of the callback function if it ever returns a non-undefined value.
  */
-export function crawl<T = undefined>(
+export function crawl<T>(
   tree: JsonTree.Tree,
   callback: (location: JsonTree.Location) => T,
-): T {
+): T | void {
   for (const location of crawler(tree)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
-  // merely appeases the compiler
-  return undefined as unknown as T;
 }
 
 /**
@@ -70,17 +64,15 @@ export function crawl<T = undefined>(
  *
  * @returns the result of the callback function if it ever returns a non-undefined value.
  */
-export function walk<T = undefined>(
+export function walk<T>(
   tree: JsonTree.Tree,
   path: JsonTree.Path,
   callback: (location: JsonTree.Location) => T,
-): T {
+): T | void {
   for (const location of walker(tree, path)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
-  // merely appeases the compiler
-  return undefined as unknown as T;
 }
 
 /**
@@ -89,17 +81,15 @@ export function walk<T = undefined>(
  *
  * @returns the result of the callback function if it ever returns a non-undefined value.
  */
-export function walkChildren<T = undefined>(
+export function walkChildren<T>(
   tree: JsonTree.Tree,
   path: JsonTree.Path,
   callback: (location: JsonTree.Location) => T,
-): T {
+): T | void {
   for (const location of childWalker(tree, path)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
-  // merely appeases the compiler
-  return undefined as unknown as T;
 }
 
 /**
@@ -107,7 +97,7 @@ export function walkChildren<T = undefined>(
  *
  * @returns the result of the callback function
  */
-export function at<T = undefined>(
+export function at<T>(
   tree: JsonTree.Tree,
   path: JsonTree.Path,
   callback: (location: JsonTree.Location) => T,
