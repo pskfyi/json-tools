@@ -3,6 +3,10 @@
 Homegrown JSON Pointer implementation, with utilities, based on
 [the official spec](https://datatracker.ietf.org/doc/html/rfc6901).
 
+```ts
+import * as JsonPointer from "path/to/JsonPointer/mod.ts";
+```
+
 ## Types
 
 <!-- deno-fmt-ignore -->
