@@ -25,7 +25,7 @@ export class EdgeNotFoundError extends PrettyError {
 
 export class PrimitiveError extends PrettyError {
   constructor(
-    value: Json.Value,
+    value: Json.Primitive,
     edge: JsonTree.Edge,
   ) {
     super(

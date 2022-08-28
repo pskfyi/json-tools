@@ -2,8 +2,7 @@ import type * as JsonTree from "./types.ts";
 import type * as Json from "../Json/mod.ts";
 import { at } from "./visitors.ts";
 import { parentPath } from "./parentPath.ts";
-import { assertTree } from "./guards.ts";
-import { EdgeNotFoundError, EdgeTypeError } from "./errors.ts";
+import { EdgeNotFoundError, EdgeTypeError, PrimitiveError } from "./errors.ts";
 
 function _removeChild(
   tree: JsonTree.Tree,
@@ -54,8 +53,10 @@ export function remove<T extends JsonTree.Tree>(
   }
 
   return at(tree, _parentPath, ({ node: target }) => {
-    assertTree(target);
     const edge = path[path.length - 1];
+    if (typeof (target) !== "object" || target === null) {
+      throw new PrimitiveError(target, edge);
+    }
     return _removeChild(target, edge);
   });
 }
