@@ -4,6 +4,8 @@ Homegrown JSON Pointer implementation, with utilities, based on
 [the official spec](https://datatracker.ietf.org/doc/html/rfc6901).
 
 ```ts
+import { JsonPointer } from "path/to/JsonTools/mod.ts";
+// OR
 import * as JsonPointer from "path/to/JsonPointer/mod.ts";
 ```
 
