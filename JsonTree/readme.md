@@ -145,6 +145,10 @@ for (const location of JsonTree.walker(tree, pathToWalk)) { /*
 */ }
 ```
 
+##### `JsonTree.childWalker(tree, path)`
+
+Same as `JsonTree.walker` above, except the first loop is omitted.
+
 #### Visitor Functions
 
 These wrap the [iterables](#iterables) above to implement the
@@ -158,5 +162,6 @@ JsonTree.crawlChildren(tree, callback);
 JsonTree.crawl(tree, callback);
 JsonTree.crawlLeaves(tree, callback);
 JsonTree.walk(tree, path, callback);
+JsonTree.walkChildren(tree, path, callback);
 JsonTree.at(tree, path, callback); // call at the end of the path
 ```
