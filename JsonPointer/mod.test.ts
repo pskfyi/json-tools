@@ -43,60 +43,6 @@ const POINTER_EXAMPLES: Array<[JsonPointer.Pointer, JsonTree.Path]> = [
 const VALID_POINTERS = POINTER_EXAMPLES.map(([pointer]) => pointer);
 const INVALID_POINTERS: string[] = ["foo", "7", "~0", "~1", "/~", "/~2", "/~5"];
 
-/*
-  Type Guards
-*/
-
-Deno.test("JsonPointer.isToken()", () => {
-  VALID_TOKENS.forEach((token) => assert(JsonPointer.isToken(token)));
-  INVALID_TOKENS.forEach((str) => assert(!JsonPointer.isToken(str)));
-});
-
-Deno.test("JsonPointer.isPointer()", () => {
-  VALID_POINTERS.forEach((ptr) => assert(JsonPointer.isPointer(ptr)));
-  INVALID_POINTERS.forEach((str) => assert(!JsonPointer.isPointer(str)));
-});
-
-Deno.test("JsonPointer.assertToken()", () => {
-  VALID_TOKENS.forEach((token) => JsonPointer.assertToken(token));
-  INVALID_TOKENS.forEach((str) =>
-    assertThrows(() => JsonPointer.assertToken(str))
-  );
-});
-
-Deno.test("JsonPointer.assertPointer()", () => {
-  VALID_POINTERS.forEach((ptr) => JsonPointer.assertPointer(ptr));
-  INVALID_POINTERS.forEach((str) =>
-    assertThrows(() => JsonPointer.assertPointer(str))
-  );
-});
-
-/*
-  Token Utilities: Escaping & Unescaping
-*/
-Deno.test("JsonPointer.escape()", () => {
-  ESCAPE_EXAMPLES.forEach(([str, token]) =>
-    assertEquals(JsonPointer.escape(str), token)
-  );
-});
-
-Deno.test("JsonPointer.unescape()", () => {
-  ESCAPE_EXAMPLES.forEach(([str, token]) =>
-    assertEquals(JsonPointer.unescape(token), str)
-  );
-});
-
-Deno.test("JsonPointer.isEscaped()", () => {
-  VALID_TOKENS.forEach((token) => assert(JsonPointer.isEscaped(token)));
-});
-
-Deno.test("JsonPointer.isUnescaped()", () => {
-  INVALID_TOKENS.forEach((str) => assert(JsonPointer.isUnescaped(str)));
-});
-
-/*
-  Token Utilities: Encoding & Decoding
-*/
 const TOKEN_EXAMPLES: Array<[JsonPointer.Token, JsonTree.Edge]> = [
   ["0", 0],
   ["7", 7],
@@ -104,56 +50,96 @@ const TOKEN_EXAMPLES: Array<[JsonPointer.Token, JsonTree.Edge]> = [
   ["77", 77],
 ];
 
-Deno.test("JsonPointer.encodeToken()", () => {
-  TOKEN_EXAMPLES.forEach(([token, edge]) =>
-    assertEquals(JsonPointer.encodeToken(edge), token)
-  );
-  ESCAPE_EXAMPLES.forEach(([str, token]) =>
-    assertEquals(JsonPointer.encodeToken(str), token)
-  );
-});
+Deno.test("JsonPointer", async ({ step: t }) => {
+  await t(".isToken()", () => {
+    VALID_TOKENS.forEach((token) => assert(JsonPointer.isToken(token)));
+    INVALID_TOKENS.forEach((str) => assert(!JsonPointer.isToken(str)));
+  });
 
-Deno.test("JsonPointer.decodeToken()", () => {
-  TOKEN_EXAMPLES.forEach(([token, edge]) =>
-    assertEquals(JsonPointer.decodeToken(token), edge)
-  );
-  ESCAPE_EXAMPLES.forEach(([str, token]) =>
-    assertEquals(JsonPointer.decodeToken(token), str)
-  );
-});
+  await t(".assertToken()", () => {
+    VALID_TOKENS.forEach((token) => JsonPointer.assertToken(token));
+    INVALID_TOKENS.forEach((str) =>
+      assertThrows(() => JsonPointer.assertToken(str))
+    );
+  });
 
-/*
-  Pointer Utilities: Encoding & Decoding
-*/
-Deno.test("JsonPointer.encode()", () => {
-  POINTER_EXAMPLES.forEach(([pointer, path]) =>
-    assertEquals(JsonPointer.encode(path), pointer)
-  );
-});
+  await t(".isPointer()", () => {
+    VALID_POINTERS.forEach((ptr) => assert(JsonPointer.isPointer(ptr)));
+    INVALID_POINTERS.forEach((str) => assert(!JsonPointer.isPointer(str)));
+  });
 
-Deno.test("JsonPointer.decode()", () => {
-  POINTER_EXAMPLES.forEach(([pointer, path]) =>
-    assertEquals(JsonPointer.decode(pointer), path)
-  );
-  INVALID_POINTERS.forEach((str) =>
-    assertThrows(() => JsonPointer.decode(str))
-  );
-});
+  await t(".assertPointer()", () => {
+    VALID_POINTERS.forEach((ptr) => JsonPointer.assertPointer(ptr));
+    INVALID_POINTERS.forEach((str) =>
+      assertThrows(() => JsonPointer.assertPointer(str))
+    );
+  });
 
-Deno.test("JsonPointer.parsePointer()", () => {
-  POINTER_EXAMPLES.forEach(([pointer, path]) =>
-    assertEquals(JsonPointer.parsePointer(pointer), path)
-  );
-});
+  await t(".escape()", () => {
+    ESCAPE_EXAMPLES.forEach(([str, token]) =>
+      assertEquals(JsonPointer.escape(str), token)
+    );
+  });
 
-/*
-  Pointer Utilities: Parent
-*/
-Deno.test("JsonPointer.parent()", () => {
-  assertEquals(JsonPointer.parent(""), undefined);
-  assertEquals(JsonPointer.parent("/"), "");
-  assertEquals(JsonPointer.parent("//"), "/");
-  assertEquals(JsonPointer.parent("/foo"), "");
-  assertEquals(JsonPointer.parent("/foo/bar"), "/foo");
-  assertEquals(JsonPointer.parent("/foo/bar/baz"), "/foo/bar");
+  await t(".isEscaped()", () => {
+    VALID_TOKENS.forEach((token) => assert(JsonPointer.isEscaped(token)));
+  });
+
+  await t(".unescape()", () => {
+    ESCAPE_EXAMPLES.forEach(([str, token]) =>
+      assertEquals(JsonPointer.unescape(token), str)
+    );
+  });
+
+  await t(".isUnescaped()", () => {
+    INVALID_TOKENS.forEach((str) => assert(JsonPointer.isUnescaped(str)));
+  });
+
+  await t(".encodeToken()", () => {
+    TOKEN_EXAMPLES.forEach(([token, edge]) =>
+      assertEquals(JsonPointer.encodeToken(edge), token)
+    );
+    ESCAPE_EXAMPLES.forEach(([str, token]) =>
+      assertEquals(JsonPointer.encodeToken(str), token)
+    );
+  });
+
+  await t(".decodeToken()", () => {
+    TOKEN_EXAMPLES.forEach(([token, edge]) =>
+      assertEquals(JsonPointer.decodeToken(token), edge)
+    );
+    ESCAPE_EXAMPLES.forEach(([str, token]) =>
+      assertEquals(JsonPointer.decodeToken(token), str)
+    );
+  });
+
+  await t(".encode()", () => {
+    POINTER_EXAMPLES.forEach(([pointer, path]) =>
+      assertEquals(JsonPointer.encode(path), pointer)
+    );
+  });
+
+  await t(".decode()", () => {
+    POINTER_EXAMPLES.forEach(([pointer, path]) =>
+      assertEquals(JsonPointer.decode(pointer), path)
+    );
+    INVALID_POINTERS.forEach((str) =>
+      assertThrows(() => JsonPointer.decode(str))
+    );
+  });
+
+  await t(".parsePointer()", () => {
+    POINTER_EXAMPLES.forEach(([pointer, path]) =>
+      assertEquals(JsonPointer.parsePointer(pointer), path)
+    );
+  });
+
+  await t(".parent()", () => {
+    assertEquals(JsonPointer.parent(""), undefined);
+    assertEquals(JsonPointer.parent("/"), "");
+    assertEquals(JsonPointer.parent("//"), "/");
+    assertEquals(JsonPointer.parent("/foo"), "");
+    assertEquals(JsonPointer.parent("/foo/bar"), "/foo");
+    assertEquals(JsonPointer.parent("/foo/bar/baz"), "/foo/bar");
+  });
 });
