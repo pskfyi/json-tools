@@ -297,6 +297,10 @@ Deno.test("JsonTree.walker()", () => {
   // tested via JsonTree.walk()
 });
 
+Deno.test("JsonTree.childWalker()", () => {
+  // tested via JsonTree.walkChildren()
+});
+
 Deno.test("JsonTree.crawlChildren()", () => {
   const root: JsonTree.Tree = [{ "A": 6, "B": 4 }, 2];
   const infoEntries: Array<JsonTree.Location> = [];
@@ -386,6 +390,29 @@ Deno.test("JsonTree.walk()", () => {
   assertThrows(() => JsonTree.walk([], [0], () => {}));
   assertThrows(() => JsonTree.walk(["A"], [0, 0], () => {}));
   assertThrows(() => JsonTree.walk([[]], [0, 0, 0], () => {}));
+});
+
+Deno.test("JsonTree.walkChildren()", () => {
+  const root: JsonTree.Tree = [{ "": 6 }, 0];
+  const locations: Array<JsonTree.Location> = [];
+
+  JsonTree.walkChildren(root, [0, ""], (location) => {
+    locations.push(location);
+  });
+
+  assertEquals(
+    locations,
+    [
+      { root, path: [0], node: root[0] },
+      { root, path: [0, ""], node: 6 },
+    ],
+  );
+
+  assert(JsonTree.walkChildren(root, [0, ""], () => 7) === 7);
+
+  assertThrows(() => JsonTree.walkChildren([], [0], () => {}));
+  assertThrows(() => JsonTree.walkChildren(["A"], [0, 0], () => {}));
+  assertThrows(() => JsonTree.walkChildren([[]], [0, 0, 0], () => {}));
 });
 
 Deno.test("JsonTree.at()", () => {

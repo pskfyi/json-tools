@@ -81,30 +81,47 @@ export function crawler(
   };
 }
 
+/**
+ * Construct an iterator that walks a path through a tree, skipping the root
+ * node.
+ */
+export function childWalker(
+  root: JsonTree.Tree,
+  path: JsonTree.Path,
+): Iterable<JsonTree.Location> {
+  return {
+    *[Symbol.iterator]() {
+      let intermediateTree: JsonTree.Tree = root;
+      let currentPath: JsonTree.Path = [];
+      let node: JsonTree.Node;
+
+      for (const edge of path) {
+        node = _getChild(intermediateTree, edge);
+        currentPath = [...currentPath, edge];
+
+        yield { root, node, path: currentPath };
+
+        const isLast = currentPath.length === path.length;
+        if (isLast) break;
+
+        if (!isTree(node)) throw new PrimitiveError(node, edge);
+        intermediateTree = node;
+      }
+    },
+  };
+}
+
 /** Construct an iterator that walks a path through a tree. */
 export function walker(
   root: JsonTree.Tree,
-  pathToWalk: JsonTree.Path,
+  path: JsonTree.Path,
 ): Iterable<JsonTree.Location> {
   return {
     *[Symbol.iterator]() {
       yield { root, node: root, path: [] };
 
-      let intermediateTree: JsonTree.Tree = root;
-      let path: JsonTree.Path = [];
-      let node: JsonTree.Node;
-
-      for (const edge of pathToWalk) {
-        node = _getChild(intermediateTree, edge);
-        path = [...path, edge];
-
-        yield { root, node, path };
-
-        const isLast = pathToWalk.length === path.length;
-        if (isLast) break;
-
-        if (!isTree(node)) throw new PrimitiveError(node, edge);
-        intermediateTree = node;
+      for (const location of childWalker(root, path)) {
+        yield location;
       }
     },
   };

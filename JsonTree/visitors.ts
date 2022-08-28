@@ -2,7 +2,13 @@ import type * as JsonTree from "./types.ts";
 import { isTree } from "./guards.ts";
 import { _getChild } from "./_getChild.ts";
 import { PrimitiveError } from "./errors.ts";
-import { childCrawler, crawler, leafCrawler, walker } from "./iterables.ts";
+import {
+  childCrawler,
+  childWalker,
+  crawler,
+  leafCrawler,
+  walker,
+} from "./iterables.ts";
 
 /**
  * Crawls through a tree's children depth-first, invoking the callback
@@ -70,6 +76,25 @@ export function walk<T = undefined>(
   callback: (location: JsonTree.Location) => T,
 ): T {
   for (const location of walker(tree, path)) {
+    const result = callback(location);
+    if (result !== undefined) return result;
+  }
+  // merely appeases the compiler
+  return undefined as unknown as T;
+}
+
+/**
+ * Walks a path through a tree, ignoring the root node, invoking the callback
+ * function at each location encountered.
+ *
+ * @returns the result of the callback function if it ever returns a non-undefined value.
+ */
+export function walkChildren<T = undefined>(
+  tree: JsonTree.Tree,
+  path: JsonTree.Path,
+  callback: (location: JsonTree.Location) => T,
+): T {
+  for (const location of childWalker(tree, path)) {
     const result = callback(location);
     if (result !== undefined) return result;
   }
