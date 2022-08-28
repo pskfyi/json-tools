@@ -319,6 +319,7 @@ Deno.test("JsonTree.crawlChildren()", () => {
     ],
   );
 
+  // If the visitor returns a value, .crawlChildren() forwards it
   assert(JsonTree.crawlChildren(root, () => 7) === 7);
 });
 
@@ -339,6 +340,7 @@ Deno.test("JsonTree.crawlLeaves()", () => {
     ],
   );
 
+  // If the visitor returns a value, .crawlLeaves() forwards it
   assert(JsonTree.crawlLeaves(root, () => 7) === 7);
 });
 
@@ -361,6 +363,7 @@ Deno.test("JsonTree.crawl()", () => {
     ],
   );
 
+  // If the visitor returns a value, .crawl() forwards it
   assert(JsonTree.crawl(root, () => 7) === 7);
 });
 
@@ -368,8 +371,10 @@ Deno.test("JsonTree.walk()", () => {
   const root: JsonTree.Tree = [{ "": 6 }, 0];
   const rootLocation = { root, path: [], node: root };
 
+  // Walking the root path only encounters the root location
   JsonTree.walk(root, [], (location) => assertEquals(location, rootLocation));
 
+  // Walking a child path encounters the expected locations
   const locations: Array<JsonTree.Location> = [];
 
   JsonTree.walk(root, [0, ""], (location) => {
@@ -385,14 +390,17 @@ Deno.test("JsonTree.walk()", () => {
     ],
   );
 
+  // If the visitor returns a value, .walk() forwards it
   assert(JsonTree.walk(root, [0, ""], () => 7) === 7);
 
+  // Errors on bad paths
   assertThrows(() => JsonTree.walk([], [0], () => {}));
   assertThrows(() => JsonTree.walk(["A"], [0, 0], () => {}));
   assertThrows(() => JsonTree.walk([[]], [0, 0, 0], () => {}));
 });
 
 Deno.test("JsonTree.walkChildren()", () => {
+  // Walking a child path encounters the expected locations
   const root: JsonTree.Tree = [{ "": 6 }, 0];
   const locations: Array<JsonTree.Location> = [];
 
@@ -408,8 +416,10 @@ Deno.test("JsonTree.walkChildren()", () => {
     ],
   );
 
+  // If the visitor returns a value, .walkChildren() forwards it
   assert(JsonTree.walkChildren(root, [0, ""], () => 7) === 7);
 
+  // Errors on bad paths
   assertThrows(() => JsonTree.walkChildren([], [0], () => {}));
   assertThrows(() => JsonTree.walkChildren(["A"], [0, 0], () => {}));
   assertThrows(() => JsonTree.walkChildren([[]], [0, 0, 0], () => {}));
