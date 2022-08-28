@@ -7,9 +7,10 @@ A collection of JSON ecosystem utilities and homegrown additions.
 <!-- deno-fmt-ignore -->
 ```ts
 import {
-  Json,         // JSON type definitions and utilities.
-  JsonTree,     // Homegrown utilities for JSON Arrays and Objects.
-  JsonPointer,  // JSON Pointer spec implementation & utilities.
+  Json,           // JSON type definitions and utilities.
+  JsonTree,       // Homegrown utilities for JSON Arrays and Objects.
+  JsonPointer,    // JSON Pointer spec implementation & utilities.
+  JsonMergePatch, // JSON Merge Patch spec implementation & utilities.
   // More coming soon
 } from "path/to/json-tools";
 ```
@@ -19,6 +20,7 @@ See:
 - [`Json`](./Json/readme.md)
 - [`JsonTree`](./JsonTree/readme.md)
 - [`JsonPointer`](./JsonPointer/readme.md)
+- [`JsonMergePatch`](./JsonMergePatch/readme.md)
 
 ## Development
 
@@ -34,9 +36,9 @@ deno fmt    # format files
 - [x] Json
 - [x] JsonTree (homegrown)
 - [x] JsonPointer
+- [x] JsonMergePatch
 - [ ] JSONPatch [Uses JSON Pointer]
 - [ ] JSON Path
-- [ ] JSON Merge Patch
 - [ ] JSON Schema [Uses JSON Pointer]
 
 ## Acknowledgements
