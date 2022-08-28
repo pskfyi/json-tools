@@ -7,65 +7,63 @@ import {
 
 import * as JsonTree from "./mod.ts";
 
-Deno.test("JsonTree.get()", () => {
-  assertEquals(JsonTree.get({}, []), {});
-  assertEquals(JsonTree.get([""], [0]), "");
-  assertEquals(JsonTree.get([[""]], [0, 0]), "");
-  assertEquals(JsonTree.get([{ "": 1 }], [0, ""]), 1);
+/*
+  Type Guards
+*/
+const VALID_TREES = [{}, [], { "": [true, null, 7] }];
+const INVALID_TREES = [
+  "",
+  123,
+  true,
+  null,
+  new Map(),
+  new Set(),
+  () => {},
+  class Foo {},
+  Symbol.asyncIterator,
+  undefined,
+  100n,
+  { "": [[100n]] },
+];
 
-  assertThrows(() => JsonTree.get([""], [0, 0]));
-  assertThrows(() => JsonTree.get([], [1]));
-  assertThrows(() => JsonTree.get([""], ["0"]));
-  assertThrows(() => JsonTree.get({ "0": 1 }, [0]));
-});
+const VALID_EDGES = ["", "Hello", 0, 7];
+const INVALID_EDGES = [-5, 3.14, Infinity, -Infinity, NaN];
 
 Deno.test("JsonTree.isTree()", () => {
-  assert(JsonTree.isTree({}));
-  assert(JsonTree.isTree([]));
-  assert(JsonTree.isTree({ "": [true, null, 7] }));
+  VALID_TREES.forEach((t) => assert(JsonTree.isTree(t)));
+  INVALID_TREES.forEach((t) => assert(!JsonTree.isTree(t)));
+});
 
-  assert(!JsonTree.isTree(""));
-  assert(!JsonTree.isTree(123));
-  assert(!JsonTree.isTree(true));
-  assert(!JsonTree.isTree(null));
-  assert(!JsonTree.isTree(new Map()));
-  assert(!JsonTree.isTree(new Set()));
-  assert(!JsonTree.isTree(() => {}));
-  assert(!JsonTree.isTree(class Foo {}));
-  assert(!JsonTree.isTree(Symbol.asyncIterator));
-  assert(!JsonTree.isTree(undefined));
-  assert(!JsonTree.isTree(100n));
-  assert(!JsonTree.isTree({ "": [[100n]] }));
+Deno.test("JsonTree.assertTree()", () => {
+  VALID_TREES.forEach((t) => JsonTree.assertTree(t));
+  INVALID_TREES.forEach((t) => assertThrows(() => JsonTree.assertTree(t)));
 });
 
 Deno.test("JsonTree.isEdge()", () => {
-  assert(JsonTree.isEdge(""));
-  assert(JsonTree.isEdge("Hello"));
-  assert(JsonTree.isEdge(0));
-  assert(JsonTree.isEdge(7));
+  VALID_EDGES.forEach((e) => assert(JsonTree.isEdge(e)));
+  INVALID_EDGES.forEach((e) => assert(!JsonTree.isEdge(e)));
+});
 
-  assert(!JsonTree.isEdge(-5));
-  assert(!JsonTree.isEdge(3.14));
-  assert(!JsonTree.isEdge(Infinity));
-  assert(!JsonTree.isEdge(-Infinity));
-  assert(!JsonTree.isEdge(NaN));
+Deno.test("JsonTree.assertEdge()", () => {
+  VALID_EDGES.forEach((e) => JsonTree.assertEdge(e));
+  INVALID_EDGES.forEach((e) => assertThrows(() => JsonTree.assertEdge(e)));
 });
 
 Deno.test("JsonTree.isPath()", () => {
   assert(JsonTree.isPath([]));
-  assert(JsonTree.isPath(["", "Hello", 0, 7]));
-
-  assert(!JsonTree.isPath(""));
-  assert(!JsonTree.isPath("Hello"));
-  assert(!JsonTree.isPath(0));
-  assert(!JsonTree.isPath(7));
-
-  assert(!JsonTree.isPath([3.14]));
-  assert(!JsonTree.isPath([Infinity]));
-  assert(!JsonTree.isPath([-Infinity]));
-  assert(!JsonTree.isPath([NaN]));
+  assert(JsonTree.isPath(VALID_EDGES));
+  INVALID_EDGES.forEach((e) => !JsonTree.isPath([e]));
 });
 
+Deno.test("JsonTree.assertPath()", () => {
+  JsonTree.assertPath([]);
+  JsonTree.assertPath(VALID_EDGES);
+  INVALID_EDGES.forEach((e) => assertThrows(() => JsonTree.assertPath([e])));
+});
+
+/*
+  Edge Utilities
+*/
 Deno.test("JsonTree.edgeMatchesTree()", () => {
   assert(JsonTree.edgeMatchesTree([], 0));
   assert(JsonTree.edgeMatchesTree({}, ""));
@@ -74,62 +72,49 @@ Deno.test("JsonTree.edgeMatchesTree()", () => {
   assert(!JsonTree.edgeMatchesTree({}, 0));
 });
 
-Deno.test("JsonTree.assertTree()", () => {
-  JsonTree.assertTree({});
-  JsonTree.assertTree([]);
-
-  assertThrows(() => JsonTree.assertTree(""));
-  assertThrows(() => JsonTree.assertTree(123));
-  assertThrows(() => JsonTree.assertTree(true));
-  assertThrows(() => JsonTree.assertTree(null));
-  assertThrows(() => JsonTree.assertTree(new Map()));
-  assertThrows(() => JsonTree.assertTree(new Set()));
-  assertThrows(() => JsonTree.assertTree(() => {}));
-  assertThrows(() => JsonTree.assertTree(class Foo {}));
-  assertThrows(() => JsonTree.assertTree(Symbol.asyncIterator));
-  assertThrows(() => JsonTree.assertTree(undefined));
-  assertThrows(() => JsonTree.assertTree(100n));
+/*
+  Path Utilities: General
+*/
+Deno.test("JsonTree.parentPath()", () => {
+  assertEquals(JsonTree.parentPath([]), undefined);
+  assertEquals(JsonTree.parentPath([0]), []);
+  assertEquals(JsonTree.parentPath(["", 1]), [""]);
+  assertEquals(JsonTree.parentPath([1, 2, 3]), [1, 2]);
 });
 
-Deno.test("JsonTree.assertEdge()", () => {
-  JsonTree.assertEdge("");
-  JsonTree.assertEdge("Hello");
-  JsonTree.assertEdge(0);
-  JsonTree.assertEdge(7);
-
-  assertThrows(() => JsonTree.assertEdge(-5));
-  assertThrows(() => JsonTree.assertEdge(3.14));
-  assertThrows(() => JsonTree.assertEdge(Infinity));
-  assertThrows(() => JsonTree.assertEdge(-Infinity));
-  assertThrows(() => JsonTree.assertEdge(NaN));
-});
-
-Deno.test("JsonTree.assertPath()", () => {
-  JsonTree.assertPath([]);
-  JsonTree.assertPath(["", "Hello", 0, 7]);
-
-  assertThrows(() => JsonTree.assertPath(""));
-  assertThrows(() => JsonTree.assertPath("Hello"));
-  assertThrows(() => JsonTree.assertPath(0));
-  assertThrows(() => JsonTree.assertPath(7));
-
-  assertThrows(() => JsonTree.assertPath([-5]));
-  assertThrows(() => JsonTree.assertPath([3.14]));
-  assertThrows(() => JsonTree.assertPath([Infinity]));
-  assertThrows(() => JsonTree.assertPath([-Infinity]));
-  assertThrows(() => JsonTree.assertPath([NaN]));
-});
+const VALID_TESTS: Array<[JsonTree.Tree, JsonTree.Path, JsonTree.Node]> = [
+  [{}, [], {}],
+  [[], [], []],
+  [[""], [0], ""],
+  [[[""]], [0, 0], ""],
+  [[{ "": 1 }], [0, ""], 1],
+];
+const INVALID_TESTS: Array<[JsonTree.Tree, JsonTree.Path, JsonTree.Node]> = [
+  [[null], [0], false],
+  [[""], [0, 0], ""],
+  [[], [1], []],
+  [[""], ["0"], ""],
+  [{ "0": 1 }, [0], 1],
+];
+const INVALID_PATHS = INVALID_TESTS.slice(1);
 
 Deno.test("JsonTree.has()", () => {
-  assert(JsonTree.has({}, []));
-  assert(JsonTree.has([], []));
-  assert(JsonTree.has([""], [0]));
-  assert(JsonTree.has([[""]], [0, 0]));
-  assert(JsonTree.has([{ "": 1 }], [0, ""]));
-  assert(!JsonTree.has([""], [0, 0]));
-  assert(!JsonTree.has([], [1]));
-  assert(!JsonTree.has([""], ["0"]));
-  assert(!JsonTree.has({ "0": 1 }, [0]));
+  VALID_TESTS.forEach(([t, p]) => assert(JsonTree.has(t, p)));
+  INVALID_PATHS.forEach(([t, p]) => assert(!JsonTree.has(t, p)));
+});
+
+Deno.test("JsonTree.test()", () => {
+  VALID_TESTS.forEach(([t, p, n]) => assert(JsonTree.test(t, p, n)));
+  INVALID_TESTS.forEach(([t, p, n]) => assert(!JsonTree.test(t, p, n)));
+  assert(!JsonTree.test([null], [0], false));
+});
+
+/*
+  Path Utilities: CRUD Operations
+*/
+Deno.test("JsonTree.get()", () => {
+  VALID_TESTS.forEach(([t, p, n]) => assertEquals(JsonTree.get(t, p), n));
+  INVALID_PATHS.forEach(([t, p]) => assertThrows(() => JsonTree.get(t, p)));
 });
 
 Deno.test("JsonTree.insert()", () => {
@@ -160,67 +145,6 @@ Deno.test("JsonTree.insert()", () => {
   assertEquals(JsonTree.insert([], [0, "", 0], 7), [{ "": [7] } as any]);
 });
 
-Deno.test("JsonTree.entries()", () => {
-  const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
-
-  assertEquals(
-    JsonTree.entries(tree),
-    [
-      [[0, "A"], 6],
-      [[0, "B"], []],
-      [[1], 2],
-    ],
-  );
-});
-
-Deno.test("JsonTree.fromEntries()", () => {
-  const entries: Array<[JsonTree.Path, JsonTree.Node]> = [
-    [[0, "A"], 6],
-    [[0, "B"], []],
-    [[1], 2],
-    [[2], {}],
-  ];
-
-  assertEquals(
-    JsonTree.fromEntries(entries),
-    [{ "A": 6, "B": [] }, 2, {}],
-  );
-});
-
-Deno.test("JsonTree.map()", () => {
-  const tree: JsonTree.Tree = [{ "A": 6, "B": [] }, 2];
-
-  assertEquals(
-    JsonTree.map(tree),
-    new Map<JsonTree.Path, JsonTree.Node>([
-      [[0, "A"], 6],
-      [[0, "B"], []],
-      [[1], 2],
-    ]),
-  );
-});
-
-Deno.test("JsonTree.fromMap()", () => {
-  const map = new Map<JsonTree.Path, JsonTree.Node>([
-    [[0, "A"], 6],
-    [[0, "B"], []],
-    [[1], 2],
-    [[2], {}],
-  ]);
-
-  assertEquals(
-    JsonTree.fromMap(map),
-    [{ "A": 6, "B": [] }, 2, {}],
-  );
-});
-
-Deno.test("JsonTree.parentPath()", () => {
-  assertEquals(JsonTree.parentPath([]), undefined);
-  assertEquals(JsonTree.parentPath([0]), []);
-  assertEquals(JsonTree.parentPath(["", 1]), [""]);
-  assertEquals(JsonTree.parentPath([1, 2, 3]), [1, 2]);
-});
-
 Deno.test("JsonTree.remove()", () => {
   // Ensure that it mutates the input
   const input = { "": 7 };
@@ -234,7 +158,6 @@ Deno.test("JsonTree.remove()", () => {
   assertEquals(JsonTree.remove({ "": [7] }, ["", 0]), 7);
   assertEquals(JsonTree.remove({ "": [6, 7] }, ["", 1]), 7);
 
-  // Overwrite
   assertThrows(() => JsonTree.remove([], []));
   assertThrows(() => JsonTree.remove([], [0]));
   assertThrows(() => JsonTree.remove({}, [""]));
@@ -256,7 +179,7 @@ Deno.test("JsonTree.set()", () => {
   assertEquals(JsonTree.set({ "": [] }, ["", 0], 7), { "": [7] });
   assertEquals(JsonTree.set({ "": [] }, ["", 1], 7), { "": [null, 7] });
 
-  // // Overwrite
+  // Overwrite
   assertEquals(JsonTree.set([6], [0], 7), [7]);
   assertEquals(JsonTree.set({ "": [] }, [""], 7), { "": 7 } as any);
   assertEquals(JsonTree.set({ "": [6] }, ["", 0], 7), { "": [7] } as any);
@@ -272,38 +195,41 @@ Deno.test("JsonTree.set()", () => {
   assertEquals(JsonTree.set([], [0, "", 0], 7), [{ "": [7] } as any]);
 });
 
-Deno.test("JsonTree.test()", () => {
-  assert(JsonTree.test({}, [], {}));
-  assert(JsonTree.test([], [], []));
-  assert(JsonTree.test([""], [0], ""));
-  assert(JsonTree.test([[""]], [0, 0], ""));
-  assert(JsonTree.test([{ "": 1 }], [0, ""], 1));
-  assert(!JsonTree.test([""], [0, 0], ""));
-  assert(!JsonTree.test([], [1], []));
-  assert(!JsonTree.test([""], ["0"], ""));
-  assert(!JsonTree.test({ "0": 1 }, [0], 1));
-});
+/*
+  Tree Utilities: General
+*/
+const TREE: JsonTree.Tree = [{ "A": 6, "B": [] }, 2, {}];
+const ENTRIES: Array<[JsonTree.Path, JsonTree.Node]> = [
+  [[0, "A"], 6],
+  [[0, "B"], []],
+  [[1], 2],
+  [[2], {}],
+];
+const MAP = new Map(ENTRIES);
 
-Deno.test("JsonTree.childCrawler()", () => {
-  // tested via JsonTree.crawlChildren()
-});
+Deno.test("JsonTree.entries()", () =>
+  assertEquals(JsonTree.entries(TREE), ENTRIES));
 
-Deno.test("JsonTree.leafCrawler()", () => {
-  // tested via JsonTree.crawlLeaves()
-});
+Deno.test("JsonTree.fromEntries()", () =>
+  assertEquals(JsonTree.fromEntries(ENTRIES), TREE));
 
-Deno.test("JsonTree.crawler()", () => {
-  // tested via JsonTree.crawl()
-});
+Deno.test("JsonTree.map()", () => assertEquals(JsonTree.map(TREE), MAP));
+Deno.test("JsonTree.map()", () => assertEquals(JsonTree.fromMap(MAP), TREE));
 
-Deno.test("JsonTree.walker()", () => {
-  // tested via JsonTree.walk()
-});
+/*
+  Tree Utilities: Iterables
 
-Deno.test("JsonTree.childWalker()", () => {
-  // tested via JsonTree.walkChildren()
-});
+  These are tested through the Visitors which implement them.
+*/
+Deno.test("JsonTree.childCrawler()", () => {});
+Deno.test("JsonTree.leafCrawler()", () => {});
+Deno.test("JsonTree.crawler()", () => {});
+Deno.test("JsonTree.walker()", () => {});
+Deno.test("JsonTree.childWalker()", () => {});
 
+/*
+  Tree Utilities: Visitors
+*/
 Deno.test("JsonTree.crawlChildren()", () => {
   const root: JsonTree.Tree = [{ "A": 6, "B": 4 }, 2];
   const locations: Array<JsonTree.Location> = [];
