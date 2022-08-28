@@ -303,14 +303,14 @@ Deno.test("JsonTree.childWalker()", () => {
 
 Deno.test("JsonTree.crawlChildren()", () => {
   const root: JsonTree.Tree = [{ "A": 6, "B": 4 }, 2];
-  const infoEntries: Array<JsonTree.Location> = [];
+  const locations: Array<JsonTree.Location> = [];
 
   JsonTree.crawlChildren(root, (location) => {
-    infoEntries.push(location);
+    locations.push(location);
   });
 
   assertEquals(
-    infoEntries,
+    locations,
     [
       { root, path: [0], node: root[0] },
       { root, path: [0, "A"], node: 6 },
@@ -426,12 +426,12 @@ Deno.test("JsonTree.at()", () => {
   assert(JsonTree.at(tree, [0], (i) => i.node) === tree[0]);
   assert(JsonTree.at(tree, [0, ""], (i) => i.node) === 6);
 
-  // Confirm Info.path === the input path
+  // Confirm Location.path === the input path
   const path = [0, ""];
-  assertEquals(JsonTree.at(tree, path, (i) => i.path), path);
+  assertEquals(JsonTree.at(tree, path, (loc) => loc.path), path);
 
-  // Confirm Info.tree === the input tree
-  assert(JsonTree.at(tree, [], (i) => i.root) === tree);
+  // Confirm Location.tree === the input tree
+  assert(JsonTree.at(tree, [], (loc) => loc.root) === tree);
 
   // Errors on bad paths
   assertThrows(() => JsonTree.at([], [0], () => {}));
