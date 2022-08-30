@@ -11,6 +11,7 @@ import {
   JsonTree,       // Homegrown utilities for JSON Arrays and Objects.
   JsonPointer,    // JSON Pointer spec implementation & utilities.
   JsonMergePatch, // JSON Merge Patch spec implementation & utilities.
+  JsonPatch,      // JSON Patch spec implementation & utilities.
   // More coming soon
 } from "path/to/json-tools";
 ```
@@ -21,6 +22,7 @@ See:
 - [`JsonTree`](./JsonTree/readme.md)
 - [`JsonPointer`](./JsonPointer/readme.md)
 - [`JsonMergePatch`](./JsonMergePatch/readme.md)
+- [`JsonPatch`](./JsonPatch/readme.md)
 
 ## Development
 
@@ -37,7 +39,7 @@ deno fmt    # format files
 - [x] JsonTree (homegrown)
 - [x] JsonPointer
 - [x] JsonMergePatch
-- [ ] JSONPatch [Uses JSON Pointer]
+- [x] JsonPatch
 - [ ] JSON Path
 - [ ] JSON Schema [Uses JSON Pointer]
 
