@@ -13,7 +13,7 @@ import {
   JsonMergePatch, // JSON Merge Patch spec implementation & utilities.
   JsonPatch,      // JSON Patch spec implementation & utilities.
   // More coming soon
-} from "path/to/json-tools";
+} from "https://raw.githubusercontent.com/pskfyi/json-tools/master/mod.ts";
 ```
 
 See:
